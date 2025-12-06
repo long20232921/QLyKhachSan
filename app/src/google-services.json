@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269319521290",
+    "project_id": "nhom6-de3-dacn",
+    "storage_bucket": "nhom6-de3-dacn.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269319521290:android:2408c4b4ba490c075d8bf3",
+        "android_client_info": {
+          "package_name": "com.example.nhom6_de3_dacn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6JWngnR0AssVFFdNvRlkib2Lmh5ZjXBQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

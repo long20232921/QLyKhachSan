@@ -1,0 +1,62 @@
+plugins {
+    id("com.android.application")
+    id("com.google.gms.google-services")
+}
+
+android {
+    namespace = "com.example.nhom6_de3_dacn"
+    // SỬA LỖI: Đổi từ bản Preview sang bản ổn định 34
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "com.example.nhom6_de3_dacn"
+        minSdk = 24
+        // SỬA LỖI: Đổi targetSdk về 34
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    buildToolsVersion = "36.0.0"
+}
+
+dependencies {
+    implementation("com.google.firebase:firebase-analytics")
+    // Dùng BOM mới nhất theo file của bạn
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+
+    // Các thư viện từ Version Catalog (libs) của bạn
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.activity)
+    implementation(libs.constraintlayout)
+    implementation(libs.firebase.auth)
+
+    // Credential Manager (Bạn đã có, nhưng chưa dùng trong code hiện tại)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.googleid)
+
+    // --- QUAN TRỌNG: Thêm dòng này để code LoginActivity hoạt động ---
+    // Code Java đang dùng GoogleSignInClient (Legacy) nên bắt buộc phải có thư viện này
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+}
