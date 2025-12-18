@@ -39,6 +39,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     // Dùng BOM mới nhất theo file của bạn
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     // Các thư viện từ Version Catalog (libs) của bạn
     implementation(libs.appcompat)
@@ -55,6 +56,7 @@ dependencies {
     // --- QUAN TRỌNG: Thêm dòng này để code LoginActivity hoạt động ---
     // Code Java đang dùng GoogleSignInClient (Legacy) nên bắt buộc phải có thư viện này
     implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation(libs.firebase.firestore)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

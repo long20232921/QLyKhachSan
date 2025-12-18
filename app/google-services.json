@@ -12,7 +12,12 @@
           "package_name": "com.example.nhom6_de3_dacn"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "269319521290-m2cplo0q9n01bqrl8pnrbpcc4kve03j6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD6JWngnR0AssVFFdNvRlkib2Lmh5ZjXBQ"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269319521290-m2cplo0q9n01bqrl8pnrbpcc4kve03j6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
