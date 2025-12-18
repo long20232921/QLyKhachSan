@@ -143,6 +143,8 @@ public class AdminMainActivity extends AppCompatActivity {
                 intent.putExtra("name", room.getName());
                 intent.putExtra("price", room.getPrice());
                 intent.putExtra("image", room.getImage());
+                intent.putExtra("description", room.getDescription());
+                intent.putExtra("rating", room.getRating());
 
                 startActivity(intent);
             });

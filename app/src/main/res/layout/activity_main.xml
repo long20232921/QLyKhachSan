@@ -107,17 +107,57 @@
                     android:padding="20dp">
 
                     <TextView android:text="Ngày nhận – trả phòng" android:textSize="12sp" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                    <LinearLayout android:orientation="horizontal" android:layout_marginTop="8dp" android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/layoutDate"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingVertical="4dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
                         <ImageView android:src="@drawable/ic_calendar" android:layout_width="20dp" android:layout_height="20dp" app:tint="#1C2E4A"/>
-                        <TextView android:text="18/07 – 20/07" android:textColor="#1C2E4A" android:textStyle="bold" android:textSize="16sp" android:layout_marginStart="12dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView
+                            android:id="@+id/tvDate"
+                            android:text="Chọn ngày"
+                            android:textColor="#1C2E4A"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginStart="12dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
 
                     <View android:background="#F0F0F0" android:layout_marginVertical="16dp" android:layout_width="match_parent" android:layout_height="1dp"/>
 
                     <TextView android:text="Số khách" android:textSize="12sp" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                    <LinearLayout android:orientation="horizontal" android:layout_marginTop="8dp" android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/layoutGuest"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingVertical="4dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
                         <ImageView android:src="@drawable/ic_person" android:layout_width="20dp" android:layout_height="20dp" app:tint="#1C2E4A"/>
-                        <TextView android:text="2 người lớn, 1 trẻ em" android:textColor="#1C2E4A" android:textStyle="bold" android:textSize="16sp" android:layout_marginStart="12dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView
+                            android:id="@+id/tvGuest"
+                            android:text="2 khách"
+                            android:textColor="#1C2E4A"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginStart="12dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
