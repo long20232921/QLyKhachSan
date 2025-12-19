@@ -9,9 +9,9 @@
         android:icon="@drawable/ic_nav_booking"
         android:title="Đặt phòng" />
     <item
-        android:id="@+id/nav_explore"
-        android:icon="@drawable/ic_nav_explore"
-        android:title="Khám phá" />
+        android:id="@+id/nav_history"
+        android:icon="@drawable/ic_nav_history"
+        android:title="Lịch Sử Đặt Phòng" />
 
     <item
         android:id="@+id/nav_profile"

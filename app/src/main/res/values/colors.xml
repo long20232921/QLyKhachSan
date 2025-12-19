@@ -8,4 +8,6 @@
     <color name="grey_500">#9E9E9E</color>
     <color name="gold">#FFC107</color>
     <color name="blue_primary">#007AFF</color>
+    <color name="green_primary">#106E50</color>
+    <color name="beige_bg">#F8F5F2</color>
 </resources>

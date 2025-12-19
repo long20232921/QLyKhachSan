@@ -40,6 +40,7 @@ dependencies {
     // Dùng BOM mới nhất theo file của bạn
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.google.firebase:firebase-storage:20.3.0")
 
     // Các thư viện từ Version Catalog (libs) của bạn
     implementation(libs.appcompat)

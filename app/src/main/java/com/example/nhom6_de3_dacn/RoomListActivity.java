@@ -28,13 +28,12 @@ public class RoomListActivity extends AppCompatActivity {
 
     private RecyclerView rvRoomList;
     private RoomListAdapter adapter;
-    private List<MainActivity.Room> originalList = new ArrayList<>();
-    private List<MainActivity.Room> filteredList = new ArrayList<>();
+    private List<Room> originalList = new ArrayList<>(); // Đã sửa MainActivity.Room -> Room
+    private List<Room> filteredList = new ArrayList<>(); // Đã sửa MainActivity.Room -> Room
     private FirebaseFirestore db;
     private MaterialButton btnPrice, btnType, btnGuest;
 
-    // Biến lưu trạng thái lọc hiện tại
-    private int currentMinGuest = 0; // 0 nghĩa là không lọc
+    private int currentMinGuest = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +43,9 @@ public class RoomListActivity extends AppCompatActivity {
         initViews();
         setupRecyclerView();
 
-        // --- XỬ LÝ DỮ LIỆU TỪ MAIN ACTIVITY GỬI SANG ---
         if (getIntent().hasExtra("filter_guest")) {
             int guestFromMain = getIntent().getIntExtra("filter_guest", 2);
             currentMinGuest = guestFromMain;
-
-            // Cập nhật text trên nút để người dùng biết đang lọc
             if (guestFromMain == 1) btnGuest.setText("1 khách");
             else if (guestFromMain == 2) btnGuest.setText("2 khách");
             else if (guestFromMain == 4) btnGuest.setText("Gia đình");
@@ -82,27 +78,26 @@ public class RoomListActivity extends AppCompatActivity {
                 originalList.clear();
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     try {
-                        MainActivity.Room room = document.toObject(MainActivity.Room.class);
+                        // Sửa MainActivity.Room -> Room
+                        Room room = document.toObject(Room.class);
                         room.setId(document.getId());
 
-                        // Nếu dữ liệu cũ chưa có maxGuests, mặc định cho là 2 để test
                         if (room.getMaxGuests() == 0) room.setMaxGuests(2);
 
                         originalList.add(room);
                     } catch (Exception e) { e.printStackTrace(); }
-                    if (currentMinGuest > 0) {
-                        filterByOption("GUEST_FILTER");
-                    } else {
-                        filterByOption("ALL");
-                    }
                 }
-                filterByOption("ALL");
+                // Di chuyển việc gọi filter ra ngoài vòng lặp để tránh gọi nhiều lần
+                if (currentMinGuest > 0) {
+                    filterByOption("GUEST_FILTER");
+                } else {
+                    filterByOption("ALL");
+                }
             }
         });
     }
 
     private void setupFilterEvents() {
-        // --- BỘ LỌC GIÁ ---
         btnPrice.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(this, v);
             popup.getMenu().add("Tất cả mức giá");
@@ -121,7 +116,6 @@ public class RoomListActivity extends AppCompatActivity {
             popup.show();
         });
 
-        // --- BỘ LỌC LOẠI PHÒNG (Ví dụ lọc theo sao) ---
         btnType.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(this, v);
             popup.getMenu().add("Tất cả");
@@ -135,7 +129,6 @@ public class RoomListActivity extends AppCompatActivity {
             popup.show();
         });
 
-        // --- BỘ LỌC SỐ KHÁCH (Đã hoàn thiện) ---
         btnGuest.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(this, v);
             popup.getMenu().add("Bất kỳ");
@@ -150,9 +143,8 @@ public class RoomListActivity extends AppCompatActivity {
                 if (title.contains("1")) currentMinGuest = 1;
                 else if (title.contains("2")) currentMinGuest = 2;
                 else if (title.contains("4")) currentMinGuest = 4;
-                else currentMinGuest = 0; // Bất kỳ
+                else currentMinGuest = 0;
 
-                // Gọi lại hàm lọc để áp dụng
                 filterByOption("GUEST_FILTER");
                 return true;
             });
@@ -160,14 +152,13 @@ public class RoomListActivity extends AppCompatActivity {
         });
     }
 
-    // Logic lọc tổng hợp
     private void filterByOption(String option) {
         filteredList.clear();
-        for (MainActivity.Room room : originalList) {
+        // Sửa MainActivity.Room -> Room
+        for (Room room : originalList) {
             long price = parsePrice(room.getPrice());
             boolean matches = false;
 
-            // 1. Check điều kiện lọc loại/giá trước
             switch (option) {
                 case "ALL": case "GUEST_FILTER": matches = true; break;
                 case "CHEAP": if (price < 1000000) matches = true; break;
@@ -176,9 +167,7 @@ public class RoomListActivity extends AppCompatActivity {
                 case "RATING": if (room.getRating() >= 4.5) matches = true; break;
             }
 
-            // 2. Check điều kiện số khách (Kết hợp AND)
             if (matches) {
-                // Nếu phòng chứa được ít nhất số khách yêu cầu
                 if (room.getMaxGuests() >= currentMinGuest) {
                     filteredList.add(room);
                 }
@@ -199,8 +188,9 @@ public class RoomListActivity extends AppCompatActivity {
 
     // --- ADAPTER ---
     public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.ViewHolder> {
-        private List<MainActivity.Room> list;
-        public RoomListAdapter(List<MainActivity.Room> list) { this.list = list; }
+        private List<Room> list; // Sửa MainActivity.Room -> Room
+        public RoomListAdapter(List<Room> list) { this.list = list; }
+
         @NonNull @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_room_list, parent, false);
@@ -209,10 +199,9 @@ public class RoomListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            MainActivity.Room room = list.get(position);
+            Room room = list.get(position); // Sửa MainActivity.Room -> Room
             holder.tvName.setText(room.getName());
 
-            // Hiển thị Rating động
             if (room.getRating() > 0) {
                 holder.tvRating.setText("⭐ " + room.getRating() + " (Tuyệt vời)");
                 holder.tvRating.setVisibility(View.VISIBLE);
@@ -251,7 +240,7 @@ public class RoomListActivity extends AppCompatActivity {
                 tvName = itemView.findViewById(R.id.tvRoomListName);
                 tvPrice = itemView.findViewById(R.id.tvRoomListPrice);
                 imgRoom = itemView.findViewById(R.id.imgRoomList);
-                tvRating = itemView.findViewById(R.id.tvRoomListRating); // Đã có ID này trong XML mới
+                tvRating = itemView.findViewById(R.id.tvRoomListRating);
             }
         }
     }

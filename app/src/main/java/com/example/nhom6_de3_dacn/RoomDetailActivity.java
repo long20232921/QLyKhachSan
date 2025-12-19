@@ -4,13 +4,11 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
-
 import java.text.DecimalFormat;
+import android.content.Intent;
 
 public class RoomDetailActivity extends AppCompatActivity {
 
@@ -97,15 +95,14 @@ public class RoomDetailActivity extends AppCompatActivity {
         // Nút Back
         btnBack.setOnClickListener(v -> finish());
 
-        // Nút Đặt phòng
         btnBookNow.setOnClickListener(v -> {
-            Toast.makeText(this, "Chuyển sang màn hình thanh toán...", Toast.LENGTH_SHORT).show();
-
-            // Sau này Bro sẽ tạo BookingActivity và gọi:
-            // Intent intent = new Intent(this, BookingActivity.class);
-            // intent.putExtra("roomId", roomId);
-            // ...
-            // startActivity(intent);
+            Intent intent = new Intent(RoomDetailActivity.this, BookingActivity.class);
+            // Gửi dữ liệu phòng sang để hiển thị
+            intent.putExtra("name", roomName);
+            intent.putExtra("price", roomPriceStr);
+            intent.putExtra("image", getIntent().getStringExtra("image"));
+            intent.putExtra("id", roomId);
+            startActivity(intent);
         });
     }
 }
