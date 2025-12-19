@@ -10,7 +10,14 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+
+    plugins {
+        id("com.android.application") version "8.12.0"
+        id("com.android.library") version "8.12.0"
+        id("com.google.gms.google-services") version "4.4.2"
+    }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -21,4 +28,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Nhom6_De3_DACN"
 include(":app")
- 
