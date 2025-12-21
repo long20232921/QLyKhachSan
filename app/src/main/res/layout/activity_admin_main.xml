@@ -51,8 +51,30 @@
                 app:backgroundTint="#005B6F"
                 app:cornerRadius="10dp"
                 android:elevation="4dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReport"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="📊  Báo cáo thống kê"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="12dp"
+                app:backgroundTint="#4CAF50"
+                app:cornerRadius="10dp"
+                android:elevation="4dp"/>
+            <Button
+                android:id="@+id/btnAdminManageRoomStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Quản Lý Trạng Thái Phòng"
+                android:backgroundTint="#4CAF50"
+                android:textColor="@android:color/white" />
+
 
             <TextView
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Danh sách phòng hiện có:"
