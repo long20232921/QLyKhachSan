@@ -1,6 +1,5 @@
 package com.example.nhom6_de3_dacn;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -109,16 +109,10 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupEvents() {
-        // Back
         btnBackProfile.setOnClickListener(v -> handleBackPress());
-
-        // Save
         tvSaveTop.setOnClickListener(v -> saveProfileData(null));
-
-        // Change Avatar
         imgAvatar.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
 
-        // Watch changes
         TextWatcher changeListener = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { checkForChanges(); }
@@ -127,7 +121,6 @@ public class ProfileActivity extends AppCompatActivity {
         etPhone.addTextChangedListener(changeListener);
         etAddress.addTextChangedListener(changeListener);
 
-        // Logout
         btnLogout.setOnClickListener(v -> {
             mAuth.signOut();
             Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
@@ -136,21 +129,15 @@ public class ProfileActivity extends AppCompatActivity {
             finish();
         });
 
-        // Support
         btnSupport.setOnClickListener(v -> Toast.makeText(this, "Đang kết nối nhân viên hỗ trợ...", Toast.LENGTH_SHORT).show());
-
-        // 👇 MỞ BẢNG XẾP HẠNG THÀNH VIÊN 👇
         tvMembership.setOnClickListener(v -> showMembershipInfo());
     }
 
-    // --- LOGIC MỚI: HIỂN THỊ BOTTOM SHEET MEMBERSHIP ---
     private void showMembershipInfo() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
-        // Nạp layout từ file layout_membership_sheet.xml
         View view = getLayoutInflater().inflate(R.layout.layout_membership_sheet, null);
         dialog.setContentView(view);
 
-        // Set background trong suốt cho container để bo góc hoạt động đẹp
         try {
             ((View) view.getParent()).setBackgroundColor(getResources().getColor(android.R.color.transparent));
         } catch (Exception e) { e.printStackTrace(); }
@@ -158,7 +145,6 @@ public class ProfileActivity extends AppCompatActivity {
         RecyclerView rvTiers = view.findViewById(R.id.rvMembershipTiers);
         MaterialButton btnClose = view.findViewById(R.id.btnCloseSheet);
 
-        // Tạo dữ liệu
         List<MembershipTier> tiers = new ArrayList<>();
         tiers.add(new MembershipTier("🌱 Thành viên Mới", "0 đ", "• Tích điểm đổi quà", 0xFFF5F5F5));
         tiers.add(new MembershipTier("🥈 Thành viên Bạc", "> 5.000.000 đ", "• Giảm 3% giá phòng\n• Check-in sớm 1 giờ", 0xFFE3F2FD));
@@ -166,7 +152,6 @@ public class ProfileActivity extends AppCompatActivity {
         tiers.add(new MembershipTier("💎 Kim Cương", "> 50.000.000 đ", "• Giảm 12% giá phòng\n• Xe đưa đón sân bay\n• Nâng hạng phòng miễn phí", 0xFFE0F7FA));
         tiers.add(new MembershipTier("👑 V.I.P", "> 100.000.000 đ", "• Giảm 20% trọn đời\n• Quản gia riêng 24/7\n• Tất cả dịch vụ miễn phí", 0xFFECEFF1));
 
-        // Setup Adapter
         MembershipAdapter adapter = new MembershipAdapter(tiers);
         rvTiers.setLayoutManager(new LinearLayoutManager(this));
         rvTiers.setAdapter(adapter);
@@ -175,7 +160,6 @@ public class ProfileActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // --- LOGIC KIỂM TRA THAY ĐỔI ---
     private void checkForChanges() {
         String currentPhone = etPhone.getText().toString().trim();
         String currentAddress = etAddress.getText().toString().trim();
@@ -231,7 +215,6 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    // --- FIREBASE LOGIC ---
     private void loadUserProfile() {
         db.collection("users").document(userId).get().addOnSuccessListener(document -> {
             if (document.exists()) {
@@ -258,17 +241,26 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    // --- 👇 ĐÃ SỬA: HÀM TÍNH HẠNG THÀNH VIÊN ---
     private void calculateMembership() {
-        db.collection("bookings").whereEqualTo("userId", userId).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                long totalSpent = 0;
-                for (QueryDocumentSnapshot doc : task.getResult()) {
-                    Double price = doc.getDouble("totalPrice");
-                    if (price != null) totalSpent += price.longValue();
-                }
-                updateMembershipUI(totalSpent);
-            }
-        });
+        db.collection("bookings")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        long totalSpent = 0;
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            // Lọc bỏ đơn đã Hủy
+                            String status = doc.getString("status");
+
+                            if (status != null && !"CANCELLED".equals(status)) {
+                                Double price = doc.getDouble("totalPrice");
+                                if (price != null) totalSpent += price.longValue();
+                            }
+                        }
+                        updateMembershipUI(totalSpent);
+                    }
+                });
     }
 
     private void updateMembershipUI(long totalSpent) {

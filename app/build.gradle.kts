@@ -17,6 +17,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -36,6 +37,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.multidex:multidex:2.0.1")
     implementation("com.google.firebase:firebase-analytics")
     // Dùng BOM mới nhất theo file của bạn
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))

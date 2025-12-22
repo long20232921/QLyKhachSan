@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="24dp"
+        android:padding="16dp"
         android:gravity="center_vertical"
         android:background="#F5F5F5"
         app:layout_constraintTop_toTopOf="parent">
@@ -33,12 +33,12 @@
             android:textColor="#333"
             android:gravity="center"/>
 
-        <ImageView
-            android:id="@+id/btnNotification"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_launcher_foreground"
-            app:tint="#333"/>
+        <include
+            android:id="@+id/layoutNotificationIcon"
+            layout="@layout/layout_notification_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp" />
+
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView

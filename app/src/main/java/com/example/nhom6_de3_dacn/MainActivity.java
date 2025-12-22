@@ -34,6 +34,10 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvFeaturedRooms;
     private BottomNavigationView bottomNavigationView;
 
+    // 👇 Biến cho phần Thông báo
+    private View layoutNotification;
+    private TextView tvBadge;
+
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -52,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
         setupFeaturedRooms();
         setupBottomNav();
         setupSearchLogic();
+
+        // 👇 Gọi hàm lắng nghe thông báo ngay khi mở app
+        listenForNotifications();
     }
 
     private void initViews() {
@@ -63,6 +70,37 @@ public class MainActivity extends AppCompatActivity {
         tvGuest = findViewById(R.id.tvGuest);
         layoutDate = findViewById(R.id.layoutDate);
         layoutGuest = findViewById(R.id.layoutGuest);
+
+        // 👇 Ánh xạ nút thông báo (Dùng ID của thẻ <include>)
+        layoutNotification = findViewById(R.id.layoutNotificationIcon);
+
+        if (layoutNotification != null) {
+            tvBadge = layoutNotification.findViewById(R.id.tvBadge);
+
+            layoutNotification.setOnClickListener(v -> {
+                // Chuyển sang trang Thông báo
+                startActivity(new Intent(MainActivity.this, NotificationActivity.class));
+            });
+        }
+    }
+
+    // 👇 LOGIC REAL-TIME: Hiện chấm đỏ nếu có tin chưa đọc
+    private void listenForNotifications() {
+        String userId = FirebaseAuth.getInstance().getUid();
+        if (userId == null || tvBadge == null) return;
+
+        db.collection("notifications")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("isRead", false) // Chỉ đếm tin chưa đọc
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) return;
+
+                    if (snapshots != null && !snapshots.isEmpty()) {
+                        tvBadge.setVisibility(View.VISIBLE); // Có tin mới -> Hiện
+                    } else {
+                        tvBadge.setVisibility(View.GONE);    // Hết tin -> Ẩn
+                    }
+                });
     }
 
     private void checkUserLogin() {
@@ -140,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupBottomNav() {
-        // Đặt mục chọn mặc định là Home
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -158,7 +195,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
 
-            // --- ĐÃ SỬA: Chuyển sang ProfileActivity ---
             if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;

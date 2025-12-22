@@ -84,36 +84,16 @@
 
         <View android:background="#F0F0F0" android:layout_marginTop="16dp" android:layout_marginBottom="12dp" android:layout_width="match_parent" android:layout_height="1dp"/>
 
-        <LinearLayout
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDetail"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="45dp"
+            android:text="Xem chi tiết"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:cornerRadius="8dp"
+            android:backgroundTint="#005B6F"
+            app:elevation="0dp"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCancel"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="40dp"
-                android:text="Hủy / Sửa"
-                android:textColor="#333"
-                android:textSize="12sp"
-                app:cornerRadius="8dp"
-                app:strokeColor="#E0E0E0"
-                app:strokeWidth="1dp"
-                android:backgroundTint="#F5F5F5"
-                android:layout_marginEnd="8dp"
-                app:elevation="0dp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDetail"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="40dp"
-                android:text="Xem chi tiết"
-                android:textSize="12sp"
-                app:cornerRadius="8dp"
-                android:backgroundTint="#005B6F"
-                app:elevation="0dp"/>
-        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

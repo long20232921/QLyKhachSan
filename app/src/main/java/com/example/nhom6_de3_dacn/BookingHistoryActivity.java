@@ -24,7 +24,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,17 +39,15 @@ public class BookingHistoryActivity extends AppCompatActivity {
     private View layoutEmpty;
     private EditText etSearch;
     private ImageView btnBack;
-
-    // 👇 Khai báo nút mới
     private MaterialButton btnBookNowEmpty;
 
     // Data
     private HistoryAdapter adapter;
-    private List<Booking> allBookings = new ArrayList<>(); // Danh sách gốc lấy từ DB
-    private List<Booking> displayList = new ArrayList<>(); // Danh sách đang hiển thị (đã lọc)
+    private List<Booking> allBookings = new ArrayList<>();
+    private List<Booking> displayList = new ArrayList<>();
 
     // State
-    private boolean isShowUpcoming = true; // Mặc định là tab Sắp tới
+    private boolean isShowUpcoming = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +67,6 @@ public class BookingHistoryActivity extends AppCompatActivity {
         layoutEmpty = findViewById(R.id.layoutEmpty);
         etSearch = findViewById(R.id.etSearchHistory);
         btnBack = findViewById(R.id.btnBackHistory);
-
-        // 👇 Ánh xạ nút đặt phòng ngay
         btnBookNowEmpty = findViewById(R.id.btnBookNowEmpty);
     }
 
@@ -82,14 +77,11 @@ public class BookingHistoryActivity extends AppCompatActivity {
     }
 
     private void setupEvents() {
-        // Nút Back
         btnBack.setOnClickListener(v -> finish());
 
-        // Chuyển Tab
         tabUpcoming.setOnClickListener(v -> switchTab(true));
         tabPast.setOnClickListener(v -> switchTab(false));
 
-        // Tìm kiếm (Lọc theo tên phòng)
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -98,16 +90,13 @@ public class BookingHistoryActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // 👇 SỰ KIỆN MỚI: Bấm nút "Đặt phòng ngay" ở màn hình trống
         btnBookNowEmpty.setOnClickListener(v -> {
-            // Chuyển sang trang danh sách phòng để đặt
             Intent intent = new Intent(BookingHistoryActivity.this, RoomListActivity.class);
             startActivity(intent);
-            finish(); // Đóng trang lịch sử lại
+            finish();
         });
     }
 
-    // --- LOGIC 1: TẢI DỮ LIỆU ---
     private void loadHistoryDataFromFirebase() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String currentUserId = FirebaseAuth.getInstance().getUid();
@@ -123,14 +112,14 @@ public class BookingHistoryActivity extends AppCompatActivity {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             try {
                                 Booking booking = document.toObject(Booking.class);
+                                if (booking.getBookingId() == null) {
+                                    booking.setBookingId(document.getId());
+                                }
                                 allBookings.add(booking);
                             } catch (Exception e) { e.printStackTrace(); }
                         }
 
-                        // Sắp xếp theo ngày đặt mới nhất lên đầu
                         Collections.sort(allBookings, (b1, b2) -> Long.compare(b2.getCheckInDate(), b1.getCheckInDate()));
-
-                        // Lọc và hiển thị dữ liệu ban đầu
                         filterList(etSearch.getText().toString());
                     } else {
                         Toast.makeText(this, "Lỗi tải dữ liệu!", Toast.LENGTH_SHORT).show();
@@ -138,11 +127,8 @@ public class BookingHistoryActivity extends AppCompatActivity {
                 });
     }
 
-    // --- LOGIC 2: CHUYỂN TAB ---
     private void switchTab(boolean isUpcoming) {
         this.isShowUpcoming = isUpcoming;
-
-        // Đổi màu giao diện Tab
         if (isUpcoming) {
             tabUpcoming.setBackgroundResource(R.drawable.bg_tab_selected);
             tabUpcoming.setTextColor(Color.WHITE);
@@ -154,11 +140,9 @@ public class BookingHistoryActivity extends AppCompatActivity {
             tabPast.setBackgroundResource(R.drawable.bg_tab_selected);
             tabPast.setTextColor(Color.WHITE);
         }
-
         filterList(etSearch.getText().toString());
     }
 
-    // --- LOGIC 3: BỘ LỌC ---
     private void filterList(String keyword) {
         displayList.clear();
         long now = System.currentTimeMillis();
@@ -166,16 +150,15 @@ public class BookingHistoryActivity extends AppCompatActivity {
 
         for (Booking b : allBookings) {
             boolean matchesTab;
-            // Lọc theo Tab
+
             if (isShowUpcoming) {
-                matchesTab = b.getCheckOutDate() > now;
+                matchesTab = (b.getCheckOutDate() > now) && !"CANCELLED".equals(b.getStatus());
             } else {
-                matchesTab = b.getCheckOutDate() <= now;
+                matchesTab = (b.getCheckOutDate() <= now) || "CANCELLED".equals(b.getStatus());
             }
 
-            // Lọc theo Tìm kiếm
             boolean matchesSearch = b.getRoomName().toLowerCase().contains(searchLower) ||
-                    b.getBookingId().toLowerCase().contains(searchLower);
+                    (b.getBookingId() != null && b.getBookingId().toLowerCase().contains(searchLower));
 
             if (matchesTab && matchesSearch) {
                 displayList.add(b);
@@ -184,7 +167,6 @@ public class BookingHistoryActivity extends AppCompatActivity {
 
         adapter.notifyDataSetChanged();
 
-        // Xử lý Empty State
         if (displayList.isEmpty()) {
             layoutEmpty.setVisibility(View.VISIBLE);
             rvBookingHistory.setVisibility(View.GONE);
@@ -211,9 +193,9 @@ public class BookingHistoryActivity extends AppCompatActivity {
 
             holder.tvName.setText(item.getRoomName());
 
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
-            String dateStr = "Check-in: " + sdf.format(new Date(item.getCheckInDate())) +
-                    " - Check-out: " + sdf.format(new Date(item.getCheckOutDate()));
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String dateStr = "Nhận: " + sdf.format(new Date(item.getCheckInDate())) +
+                    " - Trả: " + sdf.format(new Date(item.getCheckOutDate()));
             holder.tvDate.setText(dateStr);
 
             Glide.with(BookingHistoryActivity.this)
@@ -222,7 +204,6 @@ public class BookingHistoryActivity extends AppCompatActivity {
                     .placeholder(R.drawable.bg_hotel)
                     .into(holder.imgRoom);
 
-            // Xử lý Trạng thái
             String status = item.getStatus();
             if ("PENDING".equals(status)) {
                 holder.tvStatus.setText("Chờ duyệt");
@@ -238,10 +219,40 @@ public class BookingHistoryActivity extends AppCompatActivity {
                 holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE"));
             }
 
-            // Nút Xem chi tiết (Demo)
-            holder.btnDetail.setOnClickListener(v ->
-                    Toast.makeText(BookingHistoryActivity.this, "Mã đơn: " + item.getBookingId(), Toast.LENGTH_SHORT).show()
-            );
+            // --- 👇 LOGIC NÚT BẤM (ĐÃ SỬA) 👇 ---
+            long now = System.currentTimeMillis();
+
+            if ("CANCELLED".equals(status)) {
+                // TRƯỜNG HỢP 1: ĐÃ HỦY -> VỀ TRANG DANH SÁCH PHÒNG (RoomListActivity)
+                holder.btnDetail.setText("Đặt lại phòng");
+                holder.btnDetail.setBackgroundColor(Color.parseColor("#FF9800"));
+                holder.btnDetail.setOnClickListener(v -> {
+                    // 👇 ĐÃ SỬA: Chuyển về danh sách phòng để chọn lại từ đầu
+                    Intent intent = new Intent(BookingHistoryActivity.this, RoomListActivity.class);
+                    startActivity(intent);
+                });
+
+            } else if (now > item.getCheckOutDate()) {
+                // TRƯỜNG HỢP 2: ĐÃ TRẢ PHÒNG -> VIẾT ĐÁNH GIÁ
+                holder.btnDetail.setText("Viết đánh giá");
+                holder.btnDetail.setBackgroundColor(Color.parseColor("#4CAF50"));
+                holder.btnDetail.setOnClickListener(v -> {
+                    Intent intent = new Intent(BookingHistoryActivity.this, ReviewActivity.class);
+                    intent.putExtra("roomId", item.getRoomId());
+                    intent.putExtra("bookingId", item.getBookingId());
+                    startActivity(intent);
+                });
+
+            } else {
+                // TRƯỜNG HỢP 3: ĐANG HOẠT ĐỘNG -> XEM CHI TIẾT
+                holder.btnDetail.setText("Xem chi tiết");
+                holder.btnDetail.setBackgroundColor(Color.parseColor("#005B6F"));
+                holder.btnDetail.setOnClickListener(v -> {
+                    Intent intent = new Intent(BookingHistoryActivity.this, BookingDetailActivity.class);
+                    intent.putExtra("bookingId", item.getBookingId());
+                    startActivity(intent);
+                });
+            }
         }
 
         @Override public int getItemCount() { return list.size(); }
@@ -249,7 +260,7 @@ public class BookingHistoryActivity extends AppCompatActivity {
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvName, tvDate, tvStatus;
             ImageView imgRoom;
-            View btnCancel, btnDetail;
+            MaterialButton btnDetail;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -257,7 +268,6 @@ public class BookingHistoryActivity extends AppCompatActivity {
                 tvDate = itemView.findViewById(R.id.tvHistoryDate);
                 tvStatus = itemView.findViewById(R.id.tvHistoryStatus);
                 imgRoom = itemView.findViewById(R.id.imgHistoryRoom);
-                btnCancel = itemView.findViewById(R.id.btnCancel);
                 btnDetail = itemView.findViewById(R.id.btnDetail);
             }
         }

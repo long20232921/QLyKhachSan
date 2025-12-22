@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutNotificationIcon"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackgroundBorderless">
+
+    <ImageView
+        android:id="@+id/imgBell"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_notifications"
+        android:padding="2dp"
+        app:tint="#000000"/>
+
+    <TextView
+        android:id="@+id/tvBadge"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_alignTop="@id/imgBell"
+        android:layout_alignEnd="@id/imgBell"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="3dp"
+        android:background="@drawable/bg_circle_red"
+        android:visibility="gone" />
+</RelativeLayout>
