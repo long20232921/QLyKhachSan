@@ -1,32 +1,73 @@
+//package com.example.nhom6_de3_dacn;
+//
+//public class Booking {
+//    private String bookingId;    // Mã đơn (VD: BOOK-172839...)
+//    private String userId;       // ID người đặt (Lấy từ Firebase Auth)
+//    private String roomId;       // ID phòng
+//    private String roomName;     // Tên phòng (Lưu lại để hiển thị lịch sử cho nhanh)
+//    private String roomImage;    // Ảnh phòng
+//    private String customerName; // Tên người ở
+//    private String customerPhone;// SĐT người ở
+//    private String customerEmail;// Email
+//    private long checkInDate;    // Ngày đến (dạng số milisecond)
+//    private long checkOutDate;   // Ngày đi
+//    private long totalPrice;     // Tổng tiền
+//    private String status;       // Trạng thái: "PENDING" (Chờ duyệt), "CONFIRMED" (Đã duyệt), "CANCELLED" (Hủy)
+//
+//    // ⚠️ QUAN TRỌNG: Firebase bắt buộc phải có Constructor rỗng này
+//    public Booking() { }
+//
+//    // Constructor đầy đủ để mình tạo đơn cho dễ
+//    public Booking(String bookingId, String userId, String roomId, String roomName, String roomImage, String customerName, String customerPhone, String customerEmail, long checkInDate, long checkOutDate, long totalPrice, String status) {
+//        this.bookingId = bookingId;
+//        this.userId = userId;
+//        this.roomId = roomId;
+//        this.roomName = roomName;
+//        this.roomImage = roomImage;
+//        this.customerName = customerName;
+//        this.customerPhone = customerPhone;
+//        this.customerEmail = customerEmail;
+//        this.checkInDate = checkInDate;
+//        this.checkOutDate = checkOutDate;
+//        this.totalPrice = totalPrice;
+//        this.status = status;
+//    }
+//
+//    // Getter (Firebase dùng mấy cái này để đọc dữ liệu)
+//    public String getBookingId() { return bookingId; }
+//    public String getUserId() { return userId; }
+//    public String getRoomId() { return roomId; }
+//    public String getRoomName() { return roomName; }
+//    public String getRoomImage() { return roomImage; }
+//    public String getCustomerName() { return customerName; }
+//    public String getCustomerPhone() { return customerPhone; }
+//    public String getCustomerEmail() { return customerEmail; }
+//    public long getCheckInDate() { return checkInDate; }
+//    public long getCheckOutDate() { return checkOutDate; }
+//    public long getTotalPrice() { return totalPrice; }
+//    public String getStatus() { return status; }
+//}
+// sửa
 package com.example.nhom6_de3_dacn;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Booking implements Serializable {
-    private String bookingId;    // Mã đơn
-    private String userId;       // ID người đặt
-    private String roomId;       // ID phòng
-    private String roomName;     // Tên phòng
-    private String roomImage;    // Ảnh phòng
-    private String customerName; // Tên người ở
-    private String customerPhone;// SĐT
-    private String customerEmail;// Email
-    private long checkInDate;    // Ngày đến
-    private long checkOutDate;   // Ngày đi
-    private long totalPrice;     // Tổng tiền
-    private String status;       // Trạng thái: PENDING, CONFIRMED, CANCELLED
+    private String bookingId;    // ID tài liệu trên Firestore
+    private String userId;
+    private String roomId;
+    private String roomName;
+    private String roomImage;
+    private String customerName;
+    private String customerPhone;
+    private String customerEmail;
+    private long checkInDate;
+    private long checkOutDate;
+    private long totalPrice;
+    private String status;
 
-    // 👇 CÁC TRƯỜNG MỚI (Thanh toán & Dịch vụ)
-    private String paymentStatus; // "PAID_FULL", "PAID_DEPOSIT"
-    private long amountPaid;      // Số tiền đã thanh toán
-    private List<String> services; // Danh sách dịch vụ đi kèm
-
-    // Constructor rỗng (Bắt buộc cho Firebase)
-    public Booking() {
-        this.services = new ArrayList<>();
-    }
+    // Constructor rỗng bắt buộc cho Firebase
+    public Booking() { }
 
     // Constructor đầy đủ
     public Booking(String bookingId, String userId, String roomId, String roomName, String roomImage, String customerName, String customerPhone, String customerEmail, long checkInDate, long checkOutDate, long totalPrice, String status) {
@@ -42,58 +83,33 @@ public class Booking implements Serializable {
         this.checkOutDate = checkOutDate;
         this.totalPrice = totalPrice;
         this.status = status;
-        this.services = new ArrayList<>();
     }
 
-    // --- GETTER & SETTER ---
+    // --- GETTERS ---
     public String getBookingId() { return bookingId; }
-    public void setBookingId(String bookingId) { this.bookingId = bookingId; }
-
     public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
-
     public String getRoomId() { return roomId; }
-    public void setRoomId(String roomId) { this.roomId = roomId; }
-
     public String getRoomName() { return roomName; }
-    public void setRoomName(String roomName) { this.roomName = roomName; }
-
     public String getRoomImage() { return roomImage; }
-    public void setRoomImage(String roomImage) { this.roomImage = roomImage; }
-
     public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
-
     public String getCustomerPhone() { return customerPhone; }
-    public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
-
     public String getCustomerEmail() { return customerEmail; }
-    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
-
     public long getCheckInDate() { return checkInDate; }
-    public void setCheckInDate(long checkInDate) { this.checkInDate = checkInDate; }
-
     public long getCheckOutDate() { return checkOutDate; }
-    public void setCheckOutDate(long checkOutDate) { this.checkOutDate = checkOutDate; }
-
     public long getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(long totalPrice) { this.totalPrice = totalPrice; }
-
     public String getStatus() { return status; }
+
+    // --- SETTERS (Phần bạn cần cập nhật để hết lỗi) ---
+    public void setBookingId(String bookingId) { this.bookingId = bookingId; }
+    public void setUserId(String userId) { this.userId = userId; }
+    public void setRoomId(String roomId) { this.roomId = roomId; }
+    public void setRoomName(String roomName) { this.roomName = roomName; }
+    public void setRoomImage(String roomImage) { this.roomImage = roomImage; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+    public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
+    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
+    public void setCheckInDate(long checkInDate) { this.checkInDate = checkInDate; }
+    public void setCheckOutDate(long checkOutDate) { this.checkOutDate = checkOutDate; }
+    public void setTotalPrice(long totalPrice) { this.totalPrice = totalPrice; }
     public void setStatus(String status) { this.status = status; }
-
-    // 👇 Getter/Setter cho 3 biến mới
-    public String getPaymentStatus() { return paymentStatus; }
-    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
-
-    public long getAmountPaid() { return amountPaid; }
-    public void setAmountPaid(long amountPaid) { this.amountPaid = amountPaid; }
-
-    public List<String> getServices() { return services; }
-    public void setServices(List<String> services) { this.services = services; }
-
-    public void addService(String service) {
-        if (this.services == null) this.services = new ArrayList<>();
-        this.services.add(service);
-    }
 }
