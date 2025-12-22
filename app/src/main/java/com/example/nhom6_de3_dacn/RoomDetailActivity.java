@@ -50,7 +50,6 @@ public class RoomDetailActivity extends AppCompatActivity {
             // 1. Nhận Rating (Mặc định là 0 nếu không có)
             double rating = getIntent().getDoubleExtra("rating", 0.0);
 
-            // Set Text
             tvName.setText(roomName);
             tvDesc.setText(desc != null ? desc : "Đang cập nhật mô tả...");
 
@@ -69,7 +68,6 @@ public class RoomDetailActivity extends AppCompatActivity {
 
             // Format giá tiền
             try {
-                // Xử lý chuỗi giá để đảm bảo không lỗi
                 String cleanPrice = roomPriceStr.replaceAll("[^0-9]", "");
                 if (!cleanPrice.isEmpty()) {
                     long priceVal = Long.parseLong(cleanPrice);
@@ -86,13 +84,12 @@ public class RoomDetailActivity extends AppCompatActivity {
             Glide.with(this)
                     .load(image)
                     .centerCrop()
-                    .placeholder(R.drawable.bg_hotel) // Đổi thành drawable có sẵn nếu lỗi
+                    .placeholder(R.drawable.bg_hotel)
                     .into(imgRoom);
         }
     }
 
     private void setupEvents() {
-        // Nút Back
         btnBack.setOnClickListener(v -> finish());
 
         btnBookNow.setOnClickListener(v -> {

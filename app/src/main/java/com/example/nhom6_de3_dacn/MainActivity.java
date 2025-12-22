@@ -33,15 +33,13 @@ public class MainActivity extends AppCompatActivity {
     private View layoutDate, layoutGuest;
     private RecyclerView rvFeaturedRooms;
     private BottomNavigationView bottomNavigationView;
-
-    // 👇 Biến cho phần Thông báo
     private View layoutNotification;
     private TextView tvBadge;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
-    private int selectedGuestCount = 2; // Mặc định
+    private int selectedGuestCount = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +54,6 @@ public class MainActivity extends AppCompatActivity {
         setupFeaturedRooms();
         setupBottomNav();
         setupSearchLogic();
-
-        // 👇 Gọi hàm lắng nghe thông báo ngay khi mở app
         listenForNotifications();
     }
 
@@ -71,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
         layoutDate = findViewById(R.id.layoutDate);
         layoutGuest = findViewById(R.id.layoutGuest);
 
-        // 👇 Ánh xạ nút thông báo (Dùng ID của thẻ <include>)
         layoutNotification = findViewById(R.id.layoutNotificationIcon);
 
         if (layoutNotification != null) {
@@ -84,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // 👇 LOGIC REAL-TIME: Hiện chấm đỏ nếu có tin chưa đọc
     private void listenForNotifications() {
         String userId = FirebaseAuth.getInstance().getUid();
         if (userId == null || tvBadge == null) return;

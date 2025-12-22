@@ -69,5 +69,5 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:24.10.0")
 // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-// ... các thư viện khác
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

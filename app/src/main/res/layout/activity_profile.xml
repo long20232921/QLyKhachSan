@@ -60,6 +60,7 @@
                     android:orientation="vertical"
                     android:gravity="center"
                     android:layout_marginTop="10dp">
+
                     <RelativeLayout
                         android:layout_width="100dp"
                         android:layout_height="100dp">
@@ -128,6 +129,18 @@
                 android:padding="24dp">
 
                 <TextView android:text="Thông tin cá nhân" android:textStyle="bold" android:layout_marginBottom="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Họ và tên"
+                    android:layout_marginBottom="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etProfileNameInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"

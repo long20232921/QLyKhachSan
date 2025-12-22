@@ -33,9 +33,8 @@ public class EditBookingActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private String bookingId, roomId;
     private Booking currentBooking;
-    private long baseRoomPricePerNight = 0; // Giá gốc của phòng (lấy từ DB Rooms)
+    private long baseRoomPricePerNight = 0;
 
-    // Biến tạm để tính toán
     private long newCheckInDate, newCheckOutDate;
     private Calendar calendar = Calendar.getInstance();
 
@@ -110,7 +109,7 @@ public class EditBookingActivity extends AppCompatActivity {
                                 if (services.contains("Đưa đón sân bay")) cbAirport.setChecked(true);
                             }
 
-                            // QUAN TRỌNG: Phải lấy giá gốc của phòng để tính lại tiền
+                            // lấy giá gốc của phòng để tính lại tiền
                             fetchRoomBasePrice(roomId);
                         }
                     }
@@ -121,8 +120,7 @@ public class EditBookingActivity extends AppCompatActivity {
         db.collection("rooms").document(roomId).get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
-                        String priceStr = doc.getString("price"); // VD: "2.500.000"
-                        // Chuyển chuỗi giá về số Long
+                        String priceStr = doc.getString("price");
                         try {
                             baseRoomPricePerNight = Long.parseLong(priceStr.replaceAll("[^0-9]", ""));
                         } catch (Exception e) {
@@ -168,8 +166,8 @@ public class EditBookingActivity extends AppCompatActivity {
         long roomTotal = days * baseRoomPricePerNight;
         long serviceTotal = 0;
 
-        // 2. Tính dịch vụ (Giá cứng Demo)
-        if (cbBuffet.isChecked()) serviceTotal += 500000 * days; // Buffet tính theo ngày
+        // 2. Tính dịch vụ
+        if (cbBuffet.isChecked()) serviceTotal += 500000 * days;
         if (cbLaundry.isChecked()) serviceTotal += 150000;
         if (cbSpa.isChecked()) serviceTotal += 300000;
         if (cbAirport.isChecked()) serviceTotal += 200000;
@@ -201,13 +199,11 @@ public class EditBookingActivity extends AppCompatActivity {
                     boolean isAvailable = true;
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot doc : task.getResult()) {
-                            // Bỏ qua chính đơn hàng hiện tại (đang sửa)
                             if (doc.getId().equals(bookingId)) continue;
 
                             long start = doc.getLong("checkInDate");
                             long end = doc.getLong("checkOutDate");
 
-                            // Công thức check trùng lịch: (StartA < EndB) && (EndA > StartB)
                             if (newCheckInDate < end && newCheckOutDate > start) {
                                 isAvailable = false;
                                 break;
@@ -231,7 +227,7 @@ public class EditBookingActivity extends AppCompatActivity {
         if (cbSpa.isChecked()) newServices.add("Spa Thư giãn");
         if (cbAirport.isChecked()) newServices.add("Đưa đón sân bay");
 
-        // Tính lại giá lần cuối cho chắc
+        // Tính lại giá lần cuối
         String totalString = tvNewTotal.getText().toString().replace(" đ", "").replace(".", "").replace(",", "");
         long finalPrice = Long.parseLong(totalString.trim());
 

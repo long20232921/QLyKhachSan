@@ -27,7 +27,7 @@ public class MembershipAdapter extends RecyclerView.Adapter<MembershipAdapter.Vi
         holder.tvReq.setText(item.getRequirement());
         holder.tvBenefits.setText(item.getBenefits());
 
-        // Đổi màu nền nhạt theo hạng để đẹp hơn
+        // Đổi màu nền nhạt theo hạng
         holder.layoutBg.setBackgroundColor(item.getColorCode());
     }
 

@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit; // 👈 Import thư viện tính ngày
 public class BookingDetailActivity extends AppCompatActivity {
 
     private ImageView btnBack, imgRoom;
-    // 👇 Khai báo thêm tvTotalDays
     private TextView tvBookingId, tvStatus, tvRoomName, tvCheckIn, tvCheckOut, tvTotalDays, tvRoomPriceTotal, tvFinalPrice;
     private MaterialButton btnCancel, btnEdit, btnPayment;
 
@@ -62,17 +61,12 @@ public class BookingDetailActivity extends AppCompatActivity {
         tvRoomName = findViewById(R.id.tvRoomNameDetail);
         tvCheckIn = findViewById(R.id.tvCheckIn);
         tvCheckOut = findViewById(R.id.tvCheckOut);
-
-        // 👇 Ánh xạ TextView hiển thị số đêm (QUAN TRỌNG)
         tvTotalDays = findViewById(R.id.tvTotalDays);
-
         tvRoomPriceTotal = findViewById(R.id.tvRoomPriceTotal);
         tvFinalPrice = findViewById(R.id.tvFinalPrice);
-
         btnPayment = findViewById(R.id.btnPayment);
         btnCancel = findViewById(R.id.btnCancelBooking);
         btnEdit = findViewById(R.id.btnEditBooking);
-
         layoutServiceSection = findViewById(R.id.layoutServiceSection);
         containerServices = findViewById(R.id.containerServices);
         tvAddService = findViewById(R.id.tvAddService);
@@ -117,9 +111,8 @@ public class BookingDetailActivity extends AppCompatActivity {
                 });
     }
 
-    // 👇 HÀM HIỂN THỊ DỮ LIỆU (ĐÃ SỬA LOGIC)
     private void displayData(Booking booking) {
-        // 1️⃣ XỬ LÝ MÃ ĐƠN: Lấy 8 số CUỐI để khác biệt
+        // 1. XỬ LÝ MÃ ĐƠN: Lấy 8 số CUỐI để khác biệt
         String displayId = bookingId;
         if (bookingId != null && bookingId.length() > 8) {
             // Lấy từ vị trí (độ dài - 8) đến hết -> Lấy đuôi
@@ -127,19 +120,18 @@ public class BookingDetailActivity extends AppCompatActivity {
         }
         tvBookingId.setText("Mã đơn: #" + displayId);
 
-        // 2️⃣ XỬ LÝ NGÀY & SỐ ĐÊM
+        // 2. XỬ LÝ NGÀY & SỐ ĐÊM
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm, dd/MM/yyyy", Locale.getDefault());
         tvCheckIn.setText(sdf.format(new Date(booking.getCheckInDate())));
         tvCheckOut.setText(sdf.format(new Date(booking.getCheckOutDate())));
 
-        // 👇 Tính khoảng cách: (CheckOut - CheckIn) / (mili-giây 1 ngày)
         long diff = booking.getCheckOutDate() - booking.getCheckInDate();
         long days = TimeUnit.MILLISECONDS.toDays(diff);
 
-        if (days < 1) days = 1; // Tối thiểu 1 đêm
-        tvTotalDays.setText(days + " đêm"); // Ghi đè lên chữ "3 đêm" cũ
+        if (days < 1) days = 1;
+        tvTotalDays.setText(days + " đêm");
 
-        // 3️⃣ HIỂN THỊ CÁC THÔNG TIN KHÁC
+        // 3. HIỂN THỊ CÁC THÔNG TIN KHÁC
         tvRoomName.setText(booking.getRoomName());
 
         DecimalFormat formatter = new DecimalFormat("#,###");

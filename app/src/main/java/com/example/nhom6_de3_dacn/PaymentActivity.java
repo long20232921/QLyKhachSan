@@ -32,7 +32,6 @@ public class PaymentActivity extends AppCompatActivity {
     private long totalPrice;
     private long amountToPay;
 
-    // 1 = Card, 2 = Momo, 3 = Bank
     private int selectedMethod = 1;
 
     @Override
@@ -42,7 +41,6 @@ public class PaymentActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        // Nhận dữ liệu từ Activity trước
         bookingId = getIntent().getStringExtra("bookingId");
         totalPrice = getIntent().getLongExtra("totalPrice", 0);
         String roomName = getIntent().getStringExtra("roomName");
@@ -71,13 +69,13 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void setupData(String roomName) {
         tvRoomName.setText(roomName);
-        updatePayButton(totalPrice); // Mặc định là trả full
+        updatePayButton(totalPrice);
     }
 
     private void setupEvents() {
         btnBack.setOnClickListener(v -> finish());
 
-        // 1. Chọn loại thanh toán (Full/Cọc)
+        // 1. Chọn loại thanh toán
         rbFull.setOnClickListener(v -> updatePayButton(totalPrice));
         rbDeposit.setOnClickListener(v -> updatePayButton(totalPrice / 2));
 
@@ -99,12 +97,10 @@ public class PaymentActivity extends AppCompatActivity {
     private void switchMethod(int method) {
         selectedMethod = method;
 
-        // Reset background (Bro có thể tạo file drawable riêng cho đẹp)
         btnCard.setBackgroundColor(Color.parseColor(method == 1 ? "#E3F2FD" : "#FFFFFF"));
         btnMomo.setBackgroundColor(Color.parseColor(method == 2 ? "#E3F2FD" : "#FFFFFF"));
         btnBank.setBackgroundColor(Color.parseColor(method == 3 ? "#E3F2FD" : "#FFFFFF"));
 
-        // Hiện/Ẩn form nhập thẻ
         if (method == 1) {
             layoutCardInput.setVisibility(View.VISIBLE);
             tvRedirect.setVisibility(View.GONE);
@@ -115,13 +111,11 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void processPayment() {
-        // Giả lập Loading
         ProgressDialog dialog = new ProgressDialog(this);
         dialog.setMessage("Đang xử lý giao dịch an toàn...");
         dialog.setCancelable(false);
         dialog.show();
 
-        // Delay 2 giây giả vờ đang gọi API ngân hàng
         new Handler().postDelayed(() -> {
             dialog.dismiss();
 
@@ -148,7 +142,7 @@ public class PaymentActivity extends AppCompatActivity {
                 .setTitle("Thanh toán thành công! 🎉")
                 .setMessage("Cảm ơn bạn đã thanh toán. Đơn đặt phòng của bạn đã được đảm bảo.")
                 .setPositiveButton("Về trang chủ", (dialog, which) -> {
-                    finish(); // Hoặc chuyển về BookingHistoryActivity
+                    finish();
                 })
                 .setCancelable(false)
                 .show();

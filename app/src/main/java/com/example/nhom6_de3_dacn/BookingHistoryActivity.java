@@ -219,7 +219,6 @@ public class BookingHistoryActivity extends AppCompatActivity {
                 holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE"));
             }
 
-            // --- 👇 LOGIC NÚT BẤM (ĐÃ SỬA) 👇 ---
             long now = System.currentTimeMillis();
 
             if ("CANCELLED".equals(status)) {
@@ -227,7 +226,6 @@ public class BookingHistoryActivity extends AppCompatActivity {
                 holder.btnDetail.setText("Đặt lại phòng");
                 holder.btnDetail.setBackgroundColor(Color.parseColor("#FF9800"));
                 holder.btnDetail.setOnClickListener(v -> {
-                    // 👇 ĐÃ SỬA: Chuyển về danh sách phòng để chọn lại từ đầu
                     Intent intent = new Intent(BookingHistoryActivity.this, RoomListActivity.class);
                     startActivity(intent);
                 });

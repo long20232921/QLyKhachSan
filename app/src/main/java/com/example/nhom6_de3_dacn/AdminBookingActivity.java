@@ -16,9 +16,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -47,6 +49,11 @@ public class AdminBookingActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         setupRecyclerView();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadBookings();
     }
 
@@ -57,9 +64,8 @@ public class AdminBookingActivity extends AppCompatActivity {
     }
 
     private void loadBookings() {
-        // Lấy tất cả đơn, sắp xếp mới nhất lên đầu
         db.collection("bookings")
-                .orderBy("checkInDate", Query.Direction.DESCENDING) // Cần tạo index nếu lỗi, hoặc bỏ orderBy đi để test trước
+                .orderBy("checkInDate", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -67,11 +73,10 @@ public class AdminBookingActivity extends AppCompatActivity {
                         for (QueryDocumentSnapshot doc : task.getResult()) {
                             try {
                                 Booking booking = doc.toObject(Booking.class);
-                                // Booking class cần có field bookingId (document ID) để update
-                                // Nếu class Booking chưa có field id riêng, ta gán thủ công:
-                                // booking.setBookingId(doc.getId());
-                                // (Lưu ý: Bro kiểm tra lại class Booking xem đã lưu bookingId vào trong data chưa,
-                                // nếu lúc tạo đơn Bro đã lưu bookingId vào map thì ok).
+                                // Gán ID nếu trong object chưa có (đề phòng)
+                                if (booking.getBookingId() == null) {
+                                    booking.setBookingId(doc.getId());
+                                }
                                 bookingList.add(booking);
                             } catch (Exception e) { e.printStackTrace(); }
                         }
@@ -82,19 +87,42 @@ public class AdminBookingActivity extends AppCompatActivity {
                 });
     }
 
-    private void updateBookingStatus(String bookingId, String newStatus) {
-        if (bookingId == null) return;
+    private void updateBookingAndRoomStatus(String bookingId, String roomId, String newBookingStatus) {
+        if (bookingId == null || roomId == null) return;
 
-        db.collection("bookings").document(bookingId)
-                .update("status", newStatus)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
-                    loadBookings(); // Load lại danh sách để thấy thay đổi
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        String newRoomStatus = "AVAILABLE";
+
+        switch (newBookingStatus) {
+            case "CONFIRMED":
+                newRoomStatus = "BOOKED";
+                break;
+            case "CHECKED_IN":
+                newRoomStatus = "OCCUPIED";
+                break;
+            case "COMPLETED":
+                newRoomStatus = "CLEANING";
+                break;
+            case "CANCELLED":
+                newRoomStatus = "AVAILABLE";
+                break;
+        }
+
+        WriteBatch batch = db.batch();
+
+        DocumentReference bookingRef = db.collection("bookings").document(bookingId);
+        batch.update(bookingRef, "status", newBookingStatus);
+
+        DocumentReference roomRef = db.collection("rooms").document(roomId);
+        batch.update(roomRef, "status", newRoomStatus);
+
+        batch.commit().addOnSuccessListener(aVoid -> {
+            Toast.makeText(this, "Cập nhật thành công: " + newBookingStatus, Toast.LENGTH_SHORT).show();
+            loadBookings();
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Lỗi cập nhật: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
-    // --- ADAPTER ---
     public class AdminBookingAdapter extends RecyclerView.Adapter<AdminBookingAdapter.ViewHolder> {
         private List<Booking> list;
         public AdminBookingAdapter(List<Booking> list) { this.list = list; }
@@ -111,42 +139,74 @@ public class AdminBookingActivity extends AppCompatActivity {
 
             holder.tvRoomName.setText(item.getRoomName());
 
-            // Format ngày
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             String dateStr = sdf.format(new Date(item.getCheckInDate())) + " - " + sdf.format(new Date(item.getCheckOutDate()));
-            holder.tvDate.setText("Lịch: " + dateStr);
+            holder.tvDate.setText(dateStr);
 
-            // Format tiền
             DecimalFormat formatter = new DecimalFormat("#,###");
-            holder.tvPrice.setText("Tổng: " + formatter.format(item.getTotalPrice()) + " đ");
+            holder.tvPrice.setText(formatter.format(item.getTotalPrice()) + " VNĐ");
 
-            // Hiển thị thông tin khách (Cần đảm bảo lúc tạo đơn Bro đã lưu userId hoặc phone)
-            // Tạm thời hiển thị User ID nếu chưa có tên
-            holder.tvCustomer.setText("Mã KH: " + item.getUserId());
+            String cusInfo = item.getCustomerName() != null ? item.getCustomerName() : item.getCustomerPhone();
+            if (cusInfo == null) cusInfo = "Khách vãng lai (" + item.getUserId() + ")";
+            holder.tvCustomer.setText(cusInfo);
 
-            // Xử lý trạng thái
             String status = item.getStatus();
-            holder.tvStatus.setText(status);
+            holder.layoutButtons.setVisibility(View.VISIBLE);
 
             if ("PENDING".equals(status)) {
+                holder.tvStatus.setText("CHỜ DUYỆT");
                 holder.tvStatus.setTextColor(Color.parseColor("#E65100")); // Cam
-                holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF3E0"));
-                holder.layoutButtons.setVisibility(View.VISIBLE); // Hiện nút duyệt/hủy
+
+                holder.btnApprove.setText("Duyệt đơn");
+                holder.btnApprove.setBackgroundColor(Color.parseColor("#4CAF50")); // Xanh lá
+                holder.btnApprove.setVisibility(View.VISIBLE);
+
+                holder.btnReject.setText("Hủy");
+                holder.btnReject.setVisibility(View.VISIBLE);
+
+                holder.btnApprove.setOnClickListener(v ->
+                        updateBookingAndRoomStatus(item.getBookingId(), item.getRoomId(), "CONFIRMED"));
+
             } else if ("CONFIRMED".equals(status)) {
-                holder.tvStatus.setText("ĐÃ DUYỆT");
-                holder.tvStatus.setTextColor(Color.parseColor("#2E7D32")); // Xanh
-                holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9"));
-                holder.layoutButtons.setVisibility(View.GONE); // Đã duyệt rồi thì ẩn nút đi cho gọn
+                holder.tvStatus.setText("ĐÃ ĐẶT");
+                holder.tvStatus.setTextColor(Color.parseColor("#1976D2"));
+
+                holder.btnApprove.setText("Check-in");
+                holder.btnApprove.setBackgroundColor(Color.parseColor("#2196F3"));
+                holder.btnApprove.setVisibility(View.VISIBLE);
+
+                holder.btnReject.setText("Hủy");
+                holder.btnReject.setVisibility(View.VISIBLE);
+
+                holder.btnApprove.setOnClickListener(v ->
+                        updateBookingAndRoomStatus(item.getBookingId(), item.getRoomId(), "CHECKED_IN"));
+
+            } else if ("CHECKED_IN".equals(status)) {
+                holder.tvStatus.setText("ĐANG Ở");
+                holder.tvStatus.setTextColor(Color.parseColor("#E64A19"));
+
+                holder.btnApprove.setText("Trả phòng");
+                holder.btnApprove.setBackgroundColor(Color.parseColor("#FF9800"));
+                holder.btnApprove.setVisibility(View.VISIBLE);
+
+                holder.btnReject.setVisibility(View.GONE);
+
+                holder.btnApprove.setOnClickListener(v ->
+                        updateBookingAndRoomStatus(item.getBookingId(), item.getRoomId(), "COMPLETED"));
+
+            } else if ("COMPLETED".equals(status)) {
+                holder.tvStatus.setText("HOÀN TẤT");
+                holder.tvStatus.setTextColor(Color.GRAY);
+                holder.layoutButtons.setVisibility(View.GONE);
+
             } else {
                 holder.tvStatus.setText("ĐÃ HỦY");
-                holder.tvStatus.setTextColor(Color.parseColor("#C62828")); // Đỏ
-                holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE"));
+                holder.tvStatus.setTextColor(Color.RED);
                 holder.layoutButtons.setVisibility(View.GONE);
             }
 
-            // Sự kiện nút bấm
-            holder.btnApprove.setOnClickListener(v -> updateBookingStatus(item.getBookingId(), "CONFIRMED"));
-            holder.btnReject.setOnClickListener(v -> updateBookingStatus(item.getBookingId(), "CANCELLED"));
+            holder.btnReject.setOnClickListener(v ->
+                    updateBookingAndRoomStatus(item.getBookingId(), item.getRoomId(), "CANCELLED"));
         }
 
         @Override public int getItemCount() { return list.size(); }

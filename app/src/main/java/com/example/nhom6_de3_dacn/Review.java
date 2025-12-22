@@ -1,7 +1,7 @@
 package com.example.nhom6_de3_dacn;
 
 public class Review {
-    private String id; // ID của document (để biết cập nhật cái nào)
+    private String id;
     private String userId;
     private String roomId;
     private String userName;
@@ -10,13 +10,12 @@ public class Review {
     private String comment;
     private long timestamp;
 
-    // 👇 Thêm 2 trường này để phục vụ chức năng trả lời
-    private String managerReply; // Nội dung quản lý trả lời
-    private boolean isReplied;   // Trạng thái: false = chưa, true = rồi
+    private String managerReply;
+    private boolean isReplied;
 
-    public Review() {} // Constructor rỗng cho Firebase bắt buộc
+    public Review() {}
 
-    // Getter & Setter
+    // --- Getter & Setter ---
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

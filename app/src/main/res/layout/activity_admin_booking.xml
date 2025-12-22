@@ -16,7 +16,7 @@
             android:id="@+id/btnBack"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@drawable/ic_launcher_foreground"
+            android:src="@drawable/ic_arrow_back"
             app:tint="#FFF"
             android:layout_centerVertical="true"/>
         <TextView

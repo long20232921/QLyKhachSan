@@ -28,8 +28,8 @@ public class RoomListActivity extends AppCompatActivity {
 
     private RecyclerView rvRoomList;
     private RoomListAdapter adapter;
-    private List<Room> originalList = new ArrayList<>(); // Đã sửa MainActivity.Room -> Room
-    private List<Room> filteredList = new ArrayList<>(); // Đã sửa MainActivity.Room -> Room
+    private List<Room> originalList = new ArrayList<>();
+    private List<Room> filteredList = new ArrayList<>();
     private FirebaseFirestore db;
     private MaterialButton btnPrice, btnType, btnGuest;
 
@@ -87,7 +87,6 @@ public class RoomListActivity extends AppCompatActivity {
                         originalList.add(room);
                     } catch (Exception e) { e.printStackTrace(); }
                 }
-                // Di chuyển việc gọi filter ra ngoài vòng lặp để tránh gọi nhiều lần
                 if (currentMinGuest > 0) {
                     filterByOption("GUEST_FILTER");
                 } else {
@@ -188,7 +187,7 @@ public class RoomListActivity extends AppCompatActivity {
 
     // --- ADAPTER ---
     public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.ViewHolder> {
-        private List<Room> list; // Sửa MainActivity.Room -> Room
+        private List<Room> list;
         public RoomListAdapter(List<Room> list) { this.list = list; }
 
         @NonNull @Override
@@ -199,7 +198,7 @@ public class RoomListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            Room room = list.get(position); // Sửa MainActivity.Room -> Room
+            Room room = list.get(position);
             holder.tvName.setText(room.getName());
 
             if (room.getRating() > 0) {

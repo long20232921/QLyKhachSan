@@ -8,7 +8,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="40dp">
 
         <TextView
             android:id="@+id/tvTitle"
@@ -20,50 +21,95 @@
             android:textStyle="bold"
             android:layout_marginBottom="24dp"/>
 
-        <TextView android:text="Tên phòng" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView
+            android:text="Tên phòng"
+            android:textColor="#757575"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
         <EditText
             android:id="@+id/etName"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:hint="Ví dụ: Deluxe Sea View"
             android:background="@drawable/edit_text_bg"
             android:padding="12dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"/>
 
-        <TextView android:text="Giá tiền (VNĐ)" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView
+            android:text="Giá tiền (VNĐ)"
+            android:textColor="#757575"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
         <EditText
             android:id="@+id/etPrice"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Ví dụ: 2.500.000"
-            android:inputType="text"
+            android:layout_height="50dp"
+            android:hint="Ví dụ: 2500000"
+            android:inputType="number"
             android:background="@drawable/edit_text_bg"
             android:padding="12dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"/>
 
-        <TextView android:text="Link hình ảnh (URL)" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView
+            android:text="Link hình ảnh (URL)"
+            android:textColor="#757575"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
         <EditText
             android:id="@+id/etImage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:hint="https://..."
             android:inputType="textUri"
             android:background="@drawable/edit_text_bg"
             android:padding="12dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"/>
 
-        <TextView android:text="Đánh giá (Số sao)" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView
+            android:text="Đánh giá (Số sao)"
+            android:textColor="#757575"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
         <EditText
             android:id="@+id/etRating"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:hint="Ví dụ: 4.5"
             android:inputType="numberDecimal"
             android:background="@drawable/edit_text_bg"
             android:padding="12dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"/>
 
-        <TextView android:text="Mô tả chi tiết" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView
+            android:text="Trạng thái hiện tại"
+            android:textColor="#757575"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Spinner
+            android:id="@+id/spinnerStatus"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/edit_text_bg"
+            android:entries="@array/room_status_options"
+            android:padding="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:text="Mô tả chi tiết"
+            android:textColor="#757575"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
         <EditText
             android:id="@+id/etDescription"
             android:layout_width="match_parent"
@@ -72,7 +118,8 @@
             android:hint="Mô tả tiện nghi, view..."
             android:background="@drawable/edit_text_bg"
             android:padding="12dp"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="30dp"/>
 
         <Button
             android:id="@+id/btnSave"

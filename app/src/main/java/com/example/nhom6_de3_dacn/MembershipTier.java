@@ -2,9 +2,9 @@ package com.example.nhom6_de3_dacn;
 
 public class MembershipTier {
     private String name;
-    private String requirement; // Ví dụ: "Chi tiêu trên 5 triệu"
-    private String benefits;    // Ví dụ: "Giảm 5%, Ăn sáng miễn phí"
-    private int colorCode;      // Màu nền của hạng
+    private String requirement;
+    private String benefits;
+    private int colorCode;
 
     public MembershipTier(String name, String requirement, String benefits, int colorCode) {
         this.name = name;

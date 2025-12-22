@@ -38,8 +38,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     // Views
     private ImageView imgAvatar, btnBackProfile;
-    private TextView tvName, tvMembership, tvTotalSpending, tvSaveTop;
-    private TextInputEditText etEmail, etPhone, etAddress;
+    private TextView tvDisplayOnlyName, tvMembership, tvTotalSpending, tvSaveTop;
+    private TextInputEditText etName, etEmail, etPhone, etAddress; // Thêm etName
     private TextView btnLogout;
     private View btnSupport;
     private BottomNavigationView bottomNavigationView;
@@ -51,6 +51,7 @@ public class ProfileActivity extends AppCompatActivity {
     private String userId;
 
     // State Variables
+    private String originalName = "";
     private String originalPhone = "";
     private String originalAddress = "";
     private boolean isDataChanged = false;
@@ -95,10 +96,12 @@ public class ProfileActivity extends AppCompatActivity {
         btnBackProfile = findViewById(R.id.btnBackProfile);
         tvSaveTop = findViewById(R.id.tvSaveTop);
 
-        tvName = findViewById(R.id.tvProfileName);
+        tvDisplayOnlyName = findViewById(R.id.tvProfileName);
         tvMembership = findViewById(R.id.tvMembershipTier);
         tvTotalSpending = findViewById(R.id.tvTotalSpending);
 
+        // Các ô nhập liệu
+        etName = findViewById(R.id.etProfileNameInput);
         etEmail = findViewById(R.id.etProfileEmail);
         etPhone = findViewById(R.id.etProfilePhone);
         etAddress = findViewById(R.id.etProfileAddress);
@@ -113,11 +116,14 @@ public class ProfileActivity extends AppCompatActivity {
         tvSaveTop.setOnClickListener(v -> saveProfileData(null));
         imgAvatar.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
 
+        // Theo dõi thay đổi text để hiện nút Lưu
         TextWatcher changeListener = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { checkForChanges(); }
             @Override public void afterTextChanged(Editable s) {}
         };
+
+        etName.addTextChangedListener(changeListener);
         etPhone.addTextChangedListener(changeListener);
         etAddress.addTextChangedListener(changeListener);
 
@@ -133,44 +139,87 @@ public class ProfileActivity extends AppCompatActivity {
         tvMembership.setOnClickListener(v -> showMembershipInfo());
     }
 
-    private void showMembershipInfo() {
-        BottomSheetDialog dialog = new BottomSheetDialog(this);
-        View view = getLayoutInflater().inflate(R.layout.layout_membership_sheet, null);
-        dialog.setContentView(view);
-
-        try {
-            ((View) view.getParent()).setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        } catch (Exception e) { e.printStackTrace(); }
-
-        RecyclerView rvTiers = view.findViewById(R.id.rvMembershipTiers);
-        MaterialButton btnClose = view.findViewById(R.id.btnCloseSheet);
-
-        List<MembershipTier> tiers = new ArrayList<>();
-        tiers.add(new MembershipTier("🌱 Thành viên Mới", "0 đ", "• Tích điểm đổi quà", 0xFFF5F5F5));
-        tiers.add(new MembershipTier("🥈 Thành viên Bạc", "> 5.000.000 đ", "• Giảm 3% giá phòng\n• Check-in sớm 1 giờ", 0xFFE3F2FD));
-        tiers.add(new MembershipTier("🥇 Thành viên Vàng", "> 20.000.000 đ", "• Giảm 7% giá phòng\n• Miễn phí ăn sáng\n• Hủy phòng miễn phí", 0xFFFFF8E1));
-        tiers.add(new MembershipTier("💎 Kim Cương", "> 50.000.000 đ", "• Giảm 12% giá phòng\n• Xe đưa đón sân bay\n• Nâng hạng phòng miễn phí", 0xFFE0F7FA));
-        tiers.add(new MembershipTier("👑 V.I.P", "> 100.000.000 đ", "• Giảm 20% trọn đời\n• Quản gia riêng 24/7\n• Tất cả dịch vụ miễn phí", 0xFFECEFF1));
-
-        MembershipAdapter adapter = new MembershipAdapter(tiers);
-        rvTiers.setLayoutManager(new LinearLayoutManager(this));
-        rvTiers.setAdapter(adapter);
-
-        btnClose.setOnClickListener(v -> dialog.dismiss());
-        dialog.show();
-    }
-
     private void checkForChanges() {
+        String currentName = etName.getText().toString().trim();
         String currentPhone = etPhone.getText().toString().trim();
         String currentAddress = etAddress.getText().toString().trim();
 
-        if (!currentPhone.equals(originalPhone) || !currentAddress.equals(originalAddress)) {
+        if (!currentName.equals(originalName) || !currentPhone.equals(originalPhone) || !currentAddress.equals(originalAddress)) {
             isDataChanged = true;
             tvSaveTop.setVisibility(View.VISIBLE);
         } else {
             isDataChanged = false;
             tvSaveTop.setVisibility(View.GONE);
         }
+    }
+
+    private void saveProfileData(Runnable onComplete) {
+        String name = etName.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
+        String address = etAddress.getText().toString().trim();
+
+        if (name.isEmpty()) {
+            Toast.makeText(this, "Tên không được để trống", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("fullName", name); // Lưu tên vào field fullName
+        updates.put("phone", phone);
+        updates.put("address", address);
+
+        Toast.makeText(this, "Đang lưu...", Toast.LENGTH_SHORT).show();
+
+        db.collection("users").document(userId).update(updates).addOnSuccessListener(aVoid -> {
+            Toast.makeText(this, "Đã cập nhật!", Toast.LENGTH_SHORT).show();
+
+            originalName = name;
+            originalPhone = phone;
+            originalAddress = address;
+
+            // Cập nhật UI ngay lập tức
+            tvDisplayOnlyName.setText(name);
+
+            isDataChanged = false;
+            tvSaveTop.setVisibility(View.GONE);
+            if (onComplete != null) onComplete.run();
+        }).addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void loadUserProfile() {
+        db.collection("users").document(userId).get().addOnSuccessListener(document -> {
+            if (document.exists()) {
+                String email = document.getString("email");
+                String phone = document.getString("phone");
+                String address = document.getString("address");
+                String avatarUrl = document.getString("avatarUrl");
+
+                // Lấy tên từ Firestore (ưu tiên) hoặc Auth
+                String name = document.getString("fullName");
+                if (name == null || name.isEmpty()) {
+                    name = mAuth.getCurrentUser().getDisplayName();
+                }
+                if (name == null) name = "";
+
+                originalName = name;
+                originalPhone = phone != null ? phone : "";
+                originalAddress = address != null ? address : "";
+
+                etName.setText(originalName);
+                etEmail.setText(email);
+                etPhone.setText(originalPhone);
+                etAddress.setText(originalAddress);
+
+                tvDisplayOnlyName.setText(!name.isEmpty() ? name : "Khách hàng");
+
+                if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                    Glide.with(this).load(avatarUrl).circleCrop().into(imgAvatar);
+                }
+
+                isDataChanged = false;
+                tvSaveTop.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void checkChangesAndNavigate(Runnable navigationAction) {
@@ -215,97 +264,53 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void loadUserProfile() {
-        db.collection("users").document(userId).get().addOnSuccessListener(document -> {
-            if (document.exists()) {
-                String email = document.getString("email");
-                String phone = document.getString("phone");
-                String address = document.getString("address");
-                String avatarUrl = document.getString("avatarUrl");
-                String name = mAuth.getCurrentUser().getDisplayName();
-
-                originalPhone = phone != null ? phone : "";
-                originalAddress = address != null ? address : "";
-
-                etEmail.setText(email);
-                etPhone.setText(originalPhone);
-                etAddress.setText(originalAddress);
-                tvName.setText(name != null && !name.isEmpty() ? name : "Khách hàng");
-
-                if (avatarUrl != null && !avatarUrl.isEmpty()) {
-                    Glide.with(this).load(avatarUrl).circleCrop().into(imgAvatar);
-                }
-                isDataChanged = false;
-                tvSaveTop.setVisibility(View.GONE);
-            }
-        });
+    private void showMembershipInfo() {
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_membership_sheet, null);
+        dialog.setContentView(view);
+        try { ((View) view.getParent()).setBackgroundColor(getResources().getColor(android.R.color.transparent)); } catch (Exception e) {}
+        RecyclerView rvTiers = view.findViewById(R.id.rvMembershipTiers);
+        MaterialButton btnClose = view.findViewById(R.id.btnCloseSheet);
+        List<MembershipTier> tiers = new ArrayList<>();
+        tiers.add(new MembershipTier("🌱 Thành viên Mới", "0 đ", "• Tích điểm đổi quà", 0xFFF5F5F5));
+        tiers.add(new MembershipTier("🥈 Thành viên Bạc", "> 5.000.000 đ", "• Giảm 3% giá phòng\n• Check-in sớm 1 giờ", 0xFFE3F2FD));
+        tiers.add(new MembershipTier("🥇 Thành viên Vàng", "> 20.000.000 đ", "• Giảm 7% giá phòng\n• Miễn phí ăn sáng\n• Hủy phòng miễn phí", 0xFFFFF8E1));
+        tiers.add(new MembershipTier("💎 Kim Cương", "> 50.000.000 đ", "• Giảm 12% giá phòng\n• Xe đưa đón sân bay\n• Nâng hạng phòng miễn phí", 0xFFE0F7FA));
+        tiers.add(new MembershipTier("👑 V.I.P", "> 100.000.000 đ", "• Giảm 20% trọn đời\n• Quản gia riêng 24/7\n• Tất cả dịch vụ miễn phí", 0xFFECEFF1));
+        MembershipAdapter adapter = new MembershipAdapter(tiers);
+        rvTiers.setLayoutManager(new LinearLayoutManager(this));
+        rvTiers.setAdapter(adapter);
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
     }
 
-    // --- 👇 ĐÃ SỬA: HÀM TÍNH HẠNG THÀNH VIÊN ---
     private void calculateMembership() {
-        db.collection("bookings")
-                .whereEqualTo("userId", userId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        long totalSpent = 0;
-                        for (QueryDocumentSnapshot doc : task.getResult()) {
-                            // Lọc bỏ đơn đã Hủy
-                            String status = doc.getString("status");
-
-                            if (status != null && !"CANCELLED".equals(status)) {
-                                Double price = doc.getDouble("totalPrice");
-                                if (price != null) totalSpent += price.longValue();
-                            }
-                        }
-                        updateMembershipUI(totalSpent);
+        db.collection("bookings").whereEqualTo("userId", userId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                long totalSpent = 0;
+                for (QueryDocumentSnapshot doc : task.getResult()) {
+                    String status = doc.getString("status");
+                    if (status != null && !"CANCELLED".equals(status)) {
+                        Double price = doc.getDouble("totalPrice");
+                        if (price != null) totalSpent += price.longValue();
                     }
-                });
+                }
+                updateMembershipUI(totalSpent);
+            }
+        });
     }
 
     private void updateMembershipUI(long totalSpent) {
         DecimalFormat formatter = new DecimalFormat("#,###");
         tvTotalSpending.setText("Chi tiêu: " + formatter.format(totalSpent) + " đ");
-
         String tierName = "Thành viên Mới";
         int colorCode = 0xFF9E9E9E;
-
-        if (totalSpent >= 100_000_000) {
-            tierName = "👑 Thành viên V.I.P";
-            colorCode = 0xFF000000;
-        } else if (totalSpent >= 50_000_000) {
-            tierName = "💎 Kim Cương";
-            colorCode = 0xFF00BCD4;
-        } else if (totalSpent >= 20_000_000) {
-            tierName = "🥇 Vàng";
-            colorCode = 0xFFFFD700;
-        } else if (totalSpent >= 5_000_000) {
-            tierName = "🥈 Bạc";
-            colorCode = 0xFFC0C0C0;
-        }
-
+        if (totalSpent >= 100_000_000) { tierName = "👑 Thành viên V.I.P"; colorCode = 0xFF000000; }
+        else if (totalSpent >= 50_000_000) { tierName = "💎 Kim Cương"; colorCode = 0xFF00BCD4; }
+        else if (totalSpent >= 20_000_000) { tierName = "🥇 Vàng"; colorCode = 0xFFFFD700; }
+        else if (totalSpent >= 5_000_000) { tierName = "🥈 Bạc"; colorCode = 0xFFC0C0C0; }
         tvMembership.setText(tierName);
         tvMembership.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorCode));
-    }
-
-    private void saveProfileData(Runnable onComplete) {
-        String phone = etPhone.getText().toString().trim();
-        String address = etAddress.getText().toString().trim();
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("phone", phone);
-        updates.put("address", address);
-
-        Toast.makeText(this, "Đang lưu...", Toast.LENGTH_SHORT).show();
-
-        db.collection("users").document(userId).update(updates).addOnSuccessListener(aVoid -> {
-            Toast.makeText(this, "Đã cập nhật!", Toast.LENGTH_SHORT).show();
-            originalPhone = phone;
-            originalAddress = address;
-            isDataChanged = false;
-            tvSaveTop.setVisibility(View.GONE);
-            if (onComplete != null) onComplete.run();
-        }).addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void uploadImageToFirebase() {

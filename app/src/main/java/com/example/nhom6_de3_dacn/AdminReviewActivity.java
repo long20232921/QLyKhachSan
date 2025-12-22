@@ -1,7 +1,6 @@
 package com.example.nhom6_de3_dacn;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,7 +50,9 @@ public class AdminReviewActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBackAdminReview);
         recyclerView = findViewById(R.id.rvAdminReviews);
 
-        btnBack.setOnClickListener(v -> finish());
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
 
         adapter = new AdminReviewAdapter(this, reviewList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -67,7 +68,7 @@ public class AdminReviewActivity extends AppCompatActivity {
                     for (QueryDocumentSnapshot doc : snapshots) {
                         try {
                             Review review = doc.toObject(Review.class);
-                            review.setId(doc.getId()); // Lưu ID document
+                            review.setId(doc.getId());
                             reviewList.add(review);
                         } catch (Exception e) { e.printStackTrace(); }
                     }
@@ -78,13 +79,14 @@ public class AdminReviewActivity extends AppCompatActivity {
 
     private void showReplyDialog(Review review) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Trả lời khách hàng: " + review.getUserName());
+        builder.setTitle("Trả lời: " + review.getUserName());
 
         final EditText input = new EditText(this);
         input.setHint("Nhập nội dung phản hồi...");
-        input.setPadding(40, 40, 40, 40);
-        input.setBackgroundResource(android.R.color.transparent);
-        input.setMinLines(3);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
         builder.setView(input);
 
         builder.setPositiveButton("Gửi", (dialog, which) -> {
@@ -98,28 +100,29 @@ public class AdminReviewActivity extends AppCompatActivity {
     }
 
     private void submitReply(Review review, String replyText) {
-        // 1. Cập nhật review
         db.collection("reviews").document(review.getId())
                 .update("managerReply", replyText, "isReplied", true)
                 .addOnSuccessListener(aVoid -> {
-                    // 2. Tạo thông báo gửi khách hàng
+
+                    long currentTimestamp = System.currentTimeMillis();
+
                     Notification noti = new Notification(
                             review.getUserId(),
                             "💬 Phản hồi đánh giá",
-                            "Quản lý đã trả lời đánh giá của bạn về phòng " + (review.getRoomId() != null ? review.getRoomId() : "đã đặt"),
-                            "REPLY",
-                            review.getBookingId()
+                            "Admin đã trả lời đánh giá của bạn: " + replyText,
+                            "SYSTEM",
+                            review.getBookingId(),
+                            currentTimestamp
                     );
 
                     db.collection("notifications").add(noti);
 
                     Toast.makeText(this, "Đã phản hồi thành công!", Toast.LENGTH_SHORT).show();
-                    loadReviews(); // Refresh list
+                    loadReviews();
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    // --- ADAPTER ---
     class AdminReviewAdapter extends RecyclerView.Adapter<AdminReviewAdapter.ViewHolder> {
         private Context context;
         private List<Review> list;

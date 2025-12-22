@@ -51,7 +51,6 @@ public class ReviewActivity extends AppCompatActivity {
     private void setupEvents() {
         btnBack.setOnClickListener(v -> finish());
 
-        // Đổi chữ khi chọn sao
         ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
             if (rating >= 5) tvRatingLabel.setText("Tuyệt vời");
             else if (rating >= 4) tvRatingLabel.setText("Hài lòng");
@@ -73,7 +72,6 @@ public class ReviewActivity extends AppCompatActivity {
             return;
         }
 
-        // Tạo dữ liệu review
         Map<String, Object> review = new HashMap<>();
         review.put("bookingId", bookingId);
         review.put("roomId", roomId);
@@ -85,7 +83,7 @@ public class ReviewActivity extends AppCompatActivity {
         // Lưu vào Firebase
         db.collection("reviews").add(review)
                 .addOnSuccessListener(docRef -> {
-                    // Cập nhật trạng thái đơn hàng là ĐÃ ĐÁNH GIÁ (để không hiện nút đánh giá nữa)
+                    // Cập nhật trạng thái đơn hàng là ĐÃ ĐÁNH GIÁ
                     db.collection("bookings").document(bookingId).update("isReviewed", true);
 
                     Toast.makeText(this, "Cảm ơn bạn đã đánh giá!", Toast.LENGTH_SHORT).show();

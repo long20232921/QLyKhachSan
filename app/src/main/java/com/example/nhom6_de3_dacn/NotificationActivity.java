@@ -1,7 +1,8 @@
 package com.example.nhom6_de3_dacn;
 
-import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
@@ -27,11 +29,12 @@ import java.util.Locale;
 
 public class NotificationActivity extends AppCompatActivity {
 
-    private ImageView btnBack;
-    private RecyclerView recyclerView;
+    private RecyclerView rcNotification;
     private NotificationAdapter adapter;
-    private List<Notification> notificationList = new ArrayList<>();
+    private List<Notification> mList = new ArrayList<>();
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private ImageView btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,57 +42,74 @@ public class NotificationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_notification);
 
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
         initViews();
-        loadNotifications();
+
+        if (mAuth.getCurrentUser() != null) {
+            setupRecyclerView();
+            loadNotifications();
+        } else {
+            Toast.makeText(this, "Vui lòng đăng nhập!", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     private void initViews() {
-        btnBack = findViewById(R.id.btnBackNoti); // Nhớ tạo ID này trong layout
-        recyclerView = findViewById(R.id.rvNotifications); // Nhớ tạo ID này trong layout
+        rcNotification = findViewById(R.id.rcNotification);
+        btnBack = findViewById(R.id.btnBack);
 
-        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+    }
 
-        adapter = new NotificationAdapter(this, notificationList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
+    private void setupRecyclerView() {
+        adapter = new NotificationAdapter(mList);
+        rcNotification.setLayoutManager(new LinearLayoutManager(this));
+        rcNotification.setAdapter(adapter);
     }
 
     private void loadNotifications() {
-        String userId = FirebaseAuth.getInstance().getUid();
-        if (userId == null) return;
+        String currentUserId = mAuth.getCurrentUser().getUid();
 
         db.collection("notifications")
-                .whereEqualTo("userId", userId)
-                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(snapshots -> {
-                    notificationList.clear();
-                    for (QueryDocumentSnapshot doc : snapshots) {
-                        try {
-                            Notification noti = doc.toObject(Notification.class);
-                            noti.setId(doc.getId());
-                            notificationList.add(noti);
-                        } catch (Exception e) { e.printStackTrace(); }
+                .whereEqualTo("userId", currentUserId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Lỗi: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                    adapter.notifyDataSetChanged();
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi tải thông báo", Toast.LENGTH_SHORT).show());
+
+                    if (value != null) {
+                        mList.clear();
+                        for (QueryDocumentSnapshot doc : value) {
+                            try {
+                                Notification noti = doc.toObject(Notification.class);
+                                noti.setId(doc.getId());
+                                mList.add(noti);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                });
     }
 
     // --- ADAPTER ---
-    class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
-        private Context context;
+    public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
         private List<Notification> list;
 
-        public NotificationAdapter(Context context, List<Notification> list) {
-            this.context = context;
+        public NotificationAdapter(List<Notification> list) {
             this.list = list;
         }
 
-        @NonNull @Override
+        @NonNull
+        @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            // Nhớ tạo layout item_notification.xml như đã hướng dẫn trước đó
-            View view = LayoutInflater.from(context).inflate(R.layout.item_notification, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notification, parent, false);
             return new ViewHolder(view);
         }
 
@@ -100,24 +120,23 @@ public class NotificationActivity extends AppCompatActivity {
             holder.tvTitle.setText(item.getTitle());
             holder.tvMessage.setText(item.getMessage());
 
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd/MM", Locale.getDefault());
-            holder.tvTime.setText(sdf.format(new Date(item.getTimestamp())));
-
-            // Đổi icon theo loại
-            if ("PROMO".equals(item.getType())) {
-                holder.imgIcon.setImageResource(R.drawable.ic_discount); // Icon khuyến mãi
-            } else if ("REPLY".equals(item.getType())) {
-                holder.imgIcon.setImageResource(R.drawable.ic_message); // Icon tin nhắn
-            } else {
-                holder.imgIcon.setImageResource(R.drawable.ic_notifications); // Mặc định
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            try {
+                holder.tvTime.setText(sdf.format(new Date(item.getTimestamp())));
+            } catch (Exception e) {
+                holder.tvTime.setText("");
             }
 
-            // Hiện chấm xanh nếu chưa đọc
-            holder.viewUnread.setVisibility(item.isRead() ? View.GONE : View.VISIBLE);
+            if (item.isRead()) {
+                holder.tvTitle.setTypeface(null, Typeface.NORMAL);
+                holder.itemView.setBackgroundColor(Color.WHITE);
+            } else {
+                holder.tvTitle.setTypeface(null, Typeface.BOLD);
+                holder.itemView.setBackgroundColor(Color.parseColor("#E3F2FD"));
+            }
 
-            // Sự kiện Click
             holder.itemView.setOnClickListener(v -> {
-                // 1. Đánh dấu đã đọc
+                // 1. Cập nhật trạng thái đã đọc lên Firebase
                 if (!item.isRead()) {
                     db.collection("notifications").document(item.getId()).update("isRead", true);
                     item.setRead(true);
@@ -125,31 +144,24 @@ public class NotificationActivity extends AppCompatActivity {
                 }
 
                 // 2. Chuyển hướng
-                if ("REPLY".equals(item.getType())) {
-                    Intent intent = new Intent(context, BookingDetailActivity.class);
-                    intent.putExtra("bookingId", item.getTargetId());
-                    context.startActivity(intent);
-                } else if ("PROMO".equals(item.getType())) {
-                    Intent intent = new Intent(context, RoomListActivity.class);
-                    context.startActivity(intent);
+                if (item.getTargetId() != null && !item.getTargetId().isEmpty()) {
                 }
             });
         }
 
-        @Override public int getItemCount() { return list.size(); }
+        @Override
+        public int getItemCount() {
+            return list.size();
+        }
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvTitle, tvMessage, tvTime;
-            ImageView imgIcon;
-            View viewUnread;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
                 tvTitle = itemView.findViewById(R.id.tvNotiTitle);
                 tvMessage = itemView.findViewById(R.id.tvNotiMessage);
                 tvTime = itemView.findViewById(R.id.tvNotiTime);
-                imgIcon = itemView.findViewById(R.id.imgNotiIcon);
-                viewUnread = itemView.findViewById(R.id.viewUnreadDot);
             }
         }
     }

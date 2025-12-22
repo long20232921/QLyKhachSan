@@ -20,7 +20,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText etEmail, etPhone, etPassword, etConfirmPassword;
     private AppCompatButton btnRegister;
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db; // Khai báo Database
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +28,10 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance(); // Khởi tạo Database
+        db = FirebaseFirestore.getInstance();
 
         etEmail = findViewById(R.id.etRegEmail);
-        etPhone = findViewById(R.id.etRegPhone); // Ánh xạ ô nhập SĐT
+        etPhone = findViewById(R.id.etRegPhone);
         etPassword = findViewById(R.id.etRegPassword);
         etConfirmPassword = findViewById(R.id.etRegConfirmPass);
         btnRegister = findViewById(R.id.btnRegisterAction);
@@ -41,7 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void register() {
         String email = etEmail.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim(); // Lấy dữ liệu SĐT
+        String phone = etPhone.getText().toString().trim();
         String pass = etPassword.getText().toString().trim();
         String confirm = etConfirmPassword.getText().toString().trim();
 
@@ -67,12 +67,10 @@ public class RegisterActivity extends AppCompatActivity {
                     Map<String, Object> userMap = new HashMap<>();
                     userMap.put("email", email);
                     userMap.put("phone", phone);
-                    // Nếu sau này Bro thêm ô nhập Tên, thì thêm userMap.put("name", name) vào đây
 
                     db.collection("users").document(userId)
                             .set(userMap)
                             .addOnSuccessListener(aVoid -> {
-                                // Lưu Database thành công thì mới báo ĐK thành công
                                 Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
                                 finish();
                             })

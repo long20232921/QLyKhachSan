@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Nhom6_De3_DACN</string>
+    <string-array name="room_status_options">
+        <item>Phòng Trống (Available)</item>
+        <item>Đã Đặt (Booked)</item>
+        <item>Đang Sử Dụng (Occupied)</item>
+        <item>Đang Dọn Dẹp (Cleaning)</item>
+    </string-array>
 </resources>

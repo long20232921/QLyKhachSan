@@ -40,8 +40,8 @@ public class BookingActivity extends AppCompatActivity {
     private long finalTotalPrice = 0;
 
     // Giá dịch vụ thêm (Cố định để demo)
-    private final long BREAKFAST_PRICE = 450000; // 450k/người (giả sử tính cho 2 người = 900k/ngày)
-    private final long TRANSPORT_PRICE = 200000; // Xe đưa đón
+    private final long BREAKFAST_PRICE = 450000;
+    private final long TRANSPORT_PRICE = 200000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +49,10 @@ public class BookingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_booking);
 
         initViews();
-        loadUserInfo(); // Điền sẵn tên, email
-        loadRoomData(); // Lấy dữ liệu phòng từ Intent
+        loadUserInfo();
+        loadRoomData();
         setupDatePickers();
-        setupSwitches(); // Xử lý bật tắt dịch vụ
+        setupSwitches();
 
         btnConfirm.setOnClickListener(v -> handleConfirmBooking());
         btnBack.setOnClickListener(v -> finish());
@@ -87,25 +87,21 @@ public class BookingActivity extends AppCompatActivity {
     private void loadUserInfo() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            // 1. Điền thông tin cơ bản từ Auth
             etName.setText(user.getDisplayName());
             etEmail.setText(user.getEmail());
 
-            // 2. Lấy Số điện thoại từ Firestore
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             db.collection("users").document(user.getUid())
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            // Lấy chuỗi phone từ database
                             String savedPhone = documentSnapshot.getString("phone");
                             if (savedPhone != null && !savedPhone.isEmpty()) {
-                                etPhone.setText(savedPhone); // Tự động điền
+                                etPhone.setText(savedPhone);
                             }
                         }
                     })
                     .addOnFailureListener(e -> {
-                        // Lỗi thì khách tự nhập
                     });
         }
     }
@@ -119,7 +115,6 @@ public class BookingActivity extends AppCompatActivity {
             tvRoomName.setText(name);
             Glide.with(this).load(image).centerCrop().into(imgRoom);
 
-            // 1. Parse giá phòng sang số (xóa hết chữ, chỉ lấy số)
             try {
                 // Xóa mọi ký tự không phải số
                 String cleanPrice = priceStr.replaceAll("[^0-9]", "");
@@ -128,7 +123,6 @@ public class BookingActivity extends AppCompatActivity {
                 roomPricePerNight = 0;
             }
 
-            // 2. Format lại thành tiền đẹp và gán vào TextView
             DecimalFormat formatter = new DecimalFormat("#,###");
             tvBookingPrice.setText(formatter.format(roomPricePerNight) + "đ / đêm");
         }
@@ -158,13 +152,11 @@ public class BookingActivity extends AppCompatActivity {
                     calculateTotal();
                 },
                 calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
-        // Không cho chọn ngày quá khứ
         datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
         datePickerDialog.show();
     }
 
     private void setupSwitches() {
-        // Khi bật tắt switch thì tính lại tiền
         switchBreakfast.setOnCheckedChangeListener((buttonView, isChecked) -> calculateTotal());
         switchService.setOnCheckedChangeListener((buttonView, isChecked) -> calculateTotal());
     }
@@ -189,7 +181,6 @@ public class BookingActivity extends AppCompatActivity {
         // 3. Tính tiền dịch vụ
         long totalService = 0;
         if (switchBreakfast.isChecked()) {
-            // Giả sử tính cho 2 người mỗi ngày
             totalService += (BREAKFAST_PRICE * 2 * days);
         }
         if (switchService.isChecked()) {
@@ -232,15 +223,15 @@ public class BookingActivity extends AppCompatActivity {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String userId = (currentUser != null) ? currentUser.getUid() : "GUEST";
 
-        // Tạo mã đơn hàng duy nhất (Dùng thời gian hiện tại để không bao giờ trùng)
+        // Tạo mã đơn hàng
         String bookingId = "BOOK-" + System.currentTimeMillis();
 
-        // Lấy thông tin phòng từ Intent (đã gửi từ trang trước)
+        // Lấy thông tin phòng từ Intent
         String roomId = getIntent().getStringExtra("id");
         String roomImg = getIntent().getStringExtra("image");
         String rName = tvRoomName.getText().toString();
 
-        // Tạo đối tượng Booking từ class chúng ta vừa viết ở Bước 1
+        // Tạo đối tượng Booking
         Booking newBooking = new Booking(
                 bookingId,
                 userId,

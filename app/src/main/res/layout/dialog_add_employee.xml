@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView text="Thông tin nhân viên" android:textSize="20sp" android:textStyle="bold" android:layout_marginBottom="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/etEmpImage"
+        android:hint="Dán Link ảnh Avatar vào đây..."
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText android:id="@+id/etEmpName" android:hint="Họ và tên" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp"/>
+    <EditText android:id="@+id/etEmpPhone" android:hint="Số điện thoại" android:inputType="phone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp"/>
+
+    <TextView text="Chức vụ" android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <Spinner android:id="@+id/spinnerRole" android:layout_width="match_parent" android:layout_height="50dp" android:layout_marginBottom="12dp"/>
+
+    <TextView text="Công việc" android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <EditText android:id="@+id/etEmpTask" android:hint="Ví dụ: Dọn tầng 3..." android:layout_width="match_parent" android:layout_height="wrap_content"/>
+</LinearLayout>

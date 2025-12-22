@@ -2,7 +2,6 @@ package com.example.nhom6_de3_dacn;
 
 import java.io.Serializable;
 
-// Implement Serializable để có thể truyền object giữa các màn hình nếu cần
 public class Room implements Serializable {
     private String id;
     private String name;
@@ -10,9 +9,10 @@ public class Room implements Serializable {
     private String image;
     private String description;
     private double rating;
-    private int maxGuests; // Đây là biến bạn đang cần
+    private int maxGuests;
+    private String status;
 
-    // Constructor rỗng (Bắt buộc cho Firebase)
+    // Constructor rỗng
     public Room() { }
 
     public Room(String name, String price, String image, int maxGuests) {
@@ -42,7 +42,9 @@ public class Room implements Serializable {
     public double getRating() { return rating; }
     public void setRating(double rating) { this.rating = rating; }
 
-    // 👇 ĐÂY LÀ HÀM BẠN ĐANG THIẾU 👇
     public int getMaxGuests() { return maxGuests; }
     public void setMaxGuests(int maxGuests) { this.maxGuests = maxGuests; }
+
+    public String getStatus() { return status != null ? status : "AVAILABLE"; }
+    public void setStatus(String status) { this.status = status; }
 }
